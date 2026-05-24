@@ -1,5 +1,5 @@
 {
-  "name": "lume",
+  "name": "@beardcoder/lume",
   "version": "0.1.0",
   "type": "module",
   "description": "Small reactive components for existing HTML.",
