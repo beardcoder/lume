@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lume – Basic Example</title>
+</head>
+<body>
+  <div data-lume="disclosure" data-lume-id="main-menu">
+    <button data-lume-part="button" aria-expanded="false">Toggle Menu</button>
+    <div data-lume-part="panel">
+      <ul>
+        <li><a href="#">Item 1</a></li>
+        <li><a href="#">Item 2</a></li>
+        <li><a href="#">Item 3</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createLume, defineComponent } from "../../src/index.ts";
+
+    const disclosure = defineComponent(({ part, signal, on, effect }) => {
+      const button = part("button");
+      const panel = part("panel");
+      const open = signal(false);
+
+      function show() { open.set(true); }
+      function hide() { open.set(false); }
+      function toggle() { open.update(v => !v); }
+
+      on(button, "click", toggle);
+      effect(() => {
+        panel.hidden = !open();
+        button.setAttribute("aria-expanded", String(open()));
+      });
+
+      return { show, hide, toggle };
+    });
+
+    const app = createLume();
+    app.component("disclosure", disclosure).mount();
+  </script>
+</body>
+</html>
