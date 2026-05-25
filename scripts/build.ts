@@ -1,40 +1,53 @@
 import { rmSync } from "node:fs";
-import { build } from "esbuild";
 
 try {
   rmSync("./dist", { recursive: true });
 } catch {}
 
-const shared = {
-  entryPoints: ["./src/index.ts"],
-  bundle: true,
-  target: "es2020",
-  platform: "browser" as const,
-};
-
 // ESM
-await build({
-  ...shared,
-  outfile: "./dist/lume.js",
+const esmResult = await Bun.build({
+  entrypoints: ["./src/index.ts"],
+  outdir: "./dist",
+  target: "browser",
   format: "esm",
-  sourcemap: true,
+  naming: "lume.js",
+  sourcemap: "linked",
 });
+
+if (!esmResult.success) {
+  console.error("ESM build failed:", esmResult.logs);
+  process.exit(1);
+}
 
 // CJS
-await build({
-  ...shared,
-  outfile: "./dist/lume.cjs",
+const cjsResult = await Bun.build({
+  entrypoints: ["./src/index.ts"],
+  outdir: "./dist",
+  target: "browser",
   format: "cjs",
-  sourcemap: true,
+  naming: "lume.cjs",
+  sourcemap: "linked",
 });
 
+if (!cjsResult.success) {
+  console.error("CJS build failed:", cjsResult.logs);
+  process.exit(1);
+}
+
 // ESM (minified) - for CDN / size reporting
-await build({
-  ...shared,
-  outfile: "./dist/lume.min.js",
+const minResult = await Bun.build({
+  entrypoints: ["./src/index.ts"],
+  outdir: "./dist",
+  target: "browser",
   format: "esm",
+  naming: "lume.min.js",
   minify: true,
-  sourcemap: true,
+  sourcemap: "linked",
 });
+
+if (!minResult.success) {
+  console.error("Minified build failed:", minResult.logs);
+  process.exit(1);
+}
 
 console.log("Build complete.");
