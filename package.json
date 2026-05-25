@@ -1,7 +1,7 @@
 {
   "name": "@beardcoder/lume",
   "description": "Small reactive components for existing HTML.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "author": "beardcoder",
   "bugs": {
     "url": "https://github.com/beardcoder/lume/issues"
