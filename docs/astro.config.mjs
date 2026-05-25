@@ -1,5 +1,6 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import starlightThemeNova from "starlight-theme-nova";
 
 export default defineConfig({
   site: "https://beardcoder.github.io",
@@ -8,6 +9,7 @@ export default defineConfig({
     starlight({
       title: "Lume",
       description: "Small reactive components for existing HTML.",
+      plugins: [starlightThemeNova()],
       social: [
         {
           icon: "github",
@@ -15,7 +17,7 @@ export default defineConfig({
           href: "https://github.com/beardcoder/lume",
         },
       ],
-      customCss: ["./src/styles/custom.css"],
+      customCss: [],
       sidebar: [
         {
           label: "Getting Started",
