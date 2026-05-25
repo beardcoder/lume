@@ -37,6 +37,7 @@ jobs:
           path: docs/dist
 
   deploy:
+    if: ${{ github.event.repository.has_pages }}
     needs: build
     runs-on: ubuntu-latest
     environment:
