@@ -1,28 +1,40 @@
 import { rmSync } from "node:fs";
-import { build } from "bun";
+import { build } from "esbuild";
 
 try {
   rmSync("./dist", { recursive: true });
 } catch {}
 
+const shared = {
+  entryPoints: ["./src/index.ts"],
+  bundle: true,
+  target: "es2020",
+  platform: "browser" as const,
+};
+
+// ESM
 await build({
-  entrypoints: ["./src/index.ts"],
-  outdir: "./dist",
+  ...shared,
+  outfile: "./dist/lume.js",
   format: "esm",
-  target: "browser",
-  naming: "lume.js",
-  minify: false,
-  sourcemap: "external",
+  sourcemap: true,
 });
 
+// CJS
 await build({
-  entrypoints: ["./src/index.ts"],
-  outdir: "./dist",
+  ...shared,
+  outfile: "./dist/lume.cjs",
   format: "cjs",
-  target: "browser",
-  naming: "lume.cjs",
-  minify: false,
-  sourcemap: "external",
+  sourcemap: true,
+});
+
+// ESM (minified) - for CDN / size reporting
+await build({
+  ...shared,
+  outfile: "./dist/lume.min.js",
+  format: "esm",
+  minify: true,
+  sourcemap: true,
 });
 
 console.log("Build complete.");

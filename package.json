@@ -3,17 +3,26 @@
   "version": "0.1.0",
   "type": "module",
   "description": "Small reactive components for existing HTML.",
+  "author": "beardcoder",
+  "homepage": "https://github.com/beardcoder/lume#readme",
+  "bugs": {
+    "url": "https://github.com/beardcoder/lume/issues"
+  },
   "main": "./dist/lume.cjs",
   "module": "./dist/lume.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/lume.js",
-      "require": "./dist/lume.cjs",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/lume.cjs"
     }
   },
+  "sideEffects": false,
   "files": ["dist"],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "build": "bun run scripts/build.ts && tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
@@ -29,10 +38,19 @@
     "@biomejs/biome": "^1.9.4",
     "@changesets/cli": "^2.27.11",
     "bun-types": "^1.1.38",
+    "esbuild": "^0.28.0",
     "happy-dom": "20.9.0",
     "typescript": "^5.7.3"
   },
-  "keywords": ["reactive", "components", "html", "browser", "lightweight"],
+  "keywords": [
+    "reactive",
+    "components",
+    "html",
+    "browser",
+    "lightweight",
+    "signals",
+    "no-vdom"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
