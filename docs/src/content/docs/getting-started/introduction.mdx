@@ -1,0 +1,52 @@
+---
+title: Introduction
+description: What is Lume and why does it exist?
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+**Lume** is a tiny (~1 kB gzipped) reactive component library that attaches TypeScript logic to existing HTML. No virtual DOM, no JSX, no custom template syntax — just clean, browser-native behavior.
+
+## Why Lume?
+
+Modern web frameworks are powerful but often overkill for projects where HTML already exists — server-rendered pages, CMS-driven sites, or progressive enhancements on static markup.
+
+Lume fills this gap:
+
+<CardGrid>
+  <Card title="No Build Step Required" icon="rocket">
+    Works with plain HTML. Add reactivity where you need it.
+  </Card>
+  <Card title="Tiny Footprint" icon="seti:zip">
+    ~1 kB gzipped. Zero dependencies. Ships nothing you don't use.
+  </Card>
+  <Card title="Signal-Based Reactivity" icon="star">
+    Fine-grained reactivity via signals and effects — no dirty checking.
+  </Card>
+  <Card title="Type-Safe" icon="approve-check">
+    Full TypeScript support with complete type inference.
+  </Card>
+</CardGrid>
+
+## Philosophy
+
+Lume follows a simple principle: **HTML marks structure, TypeScript contains logic.**
+
+- Components are defined in TypeScript and attached to existing HTML via `data-lume` attributes
+- No special template syntax — use the DOM APIs you already know
+- Automatic cleanup of event listeners and effects when components unmount
+- Communication between components via a lightweight event bus
+
+## What Lume Does Not Do
+
+Lume intentionally has no:
+
+- Virtual DOM or renderer
+- JSX or custom templates
+- Directives (`data-lume-show`, `data-lume-on`, etc.)
+- Router, store, or SSR
+- Animation APIs
+- Devtools or inspect
+- Framework-style contracts or aliases
+
+This makes Lume predictable, debuggable, and easy to adopt incrementally.
