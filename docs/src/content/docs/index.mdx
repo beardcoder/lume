@@ -1,0 +1,35 @@
+---
+title: Lume
+description: Small reactive components for existing HTML.
+template: splash
+hero:
+  tagline: Tiny (~1 kB) reactive components for existing HTML. No Virtual DOM, no JSX, no magic — just signals, effects, and the DOM you already have.
+  actions:
+    - text: Get Started
+      link: /lume/getting-started/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/beardcoder/lume
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+## Why Lume?
+
+<CardGrid stagger>
+  <Card title="~1 kB Gzipped" icon="rocket">
+    Incredibly small. Zero dependencies. Ships nothing you don't use.
+  </Card>
+  <Card title="Signal-Based Reactivity" icon="star">
+    Fine-grained reactive updates via signals and effects — no dirty checking, no VDOM diffing.
+  </Card>
+  <Card title="HTML-First" icon="document">
+    Attach logic to existing HTML. Perfect for server-rendered pages, CMS sites, or progressive enhancement.
+  </Card>
+  <Card title="TypeScript Native" icon="approve-check">
+    Written in TypeScript with full type inference. No `@types` packages needed.
+  </Card>
+</CardGrid>
