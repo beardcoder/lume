@@ -55,9 +55,7 @@ export function createLume(): LumeApp {
     require<T extends Record<string, unknown>>(id: string): T {
       const instance = instances.get(id) as T | undefined;
       if (!instance) {
-        throw new Error(
-          `[lume] Component with id "${id}" not found. Make sure it is mounted.`
-        );
+        throw new Error(`[lume] Component "${id}" not found`);
       }
       return instance;
     },

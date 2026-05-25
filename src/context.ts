@@ -11,26 +11,13 @@ export function createContext(
 
   const ctx: ComponentContext = {
     root,
-
-    part(name) {
-      return queryPart(root, name);
-    },
-
-    parts(name) {
-      return queryParts(root, name);
-    },
-
-    template(name) {
-      return queryTemplate(root, name);
-    },
-
-    signal(initial) {
-      return signal(initial);
-    },
+    part: (name) => queryPart(root, name),
+    parts: (name) => queryParts(root, name),
+    template: (name) => queryTemplate(root, name),
+    signal,
 
     effect(fn) {
-      const dispose = effect(fn);
-      cleanups.push(dispose);
+      cleanups.push(effect(fn));
     },
 
     on(target, event, handler, options) {
@@ -47,8 +34,7 @@ export function createContext(
     },
 
     listen(name, handler) {
-      const off = appBus.listen(name, handler);
-      cleanups.push(off);
+      cleanups.push(appBus.listen(name, handler));
     },
 
     global: {
@@ -56,8 +42,7 @@ export function createContext(
         globalBus.emit(name, detail);
       },
       listen(name, handler) {
-        const off = globalBus.listen(name, handler);
-        cleanups.push(off);
+        cleanups.push(globalBus.listen(name, handler));
       },
     },
   };
@@ -65,9 +50,7 @@ export function createContext(
   return {
     ctx,
     dispose() {
-      for (const fn of cleanups) {
-        fn();
-      }
+      for (const fn of cleanups) fn();
       cleanups.length = 0;
     },
   };
