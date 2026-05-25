@@ -18,12 +18,12 @@
     </template>
   </div>
 
-  <button id="trigger">Show Toast</button>
+  <button type="button" id="trigger">Show Toast</button>
 
   <script type="module">
     import { createLume, defineComponent } from "../../src/index.ts";
 
-    const toast = defineComponent(({ root, template, on, cleanup }) => {
+    const toast = defineComponent(({ root, template }) => {
       const createItem = template("item");
 
       function show(message) {
