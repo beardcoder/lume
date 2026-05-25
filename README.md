@@ -2,16 +2,27 @@
 
 > Small reactive components for existing HTML.
 
+[![Bundle Size](https://img.shields.io/badge/gzip-~1kB-brightgreen)](https://github.com/beardcoder/lume)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 Lume lets you attach reactive TypeScript components to existing HTML — no renderer, no Virtual DOM, no JSX. It is calm, clean, and browser-native.
+
+### Bundle Size
+
+| Format        | Size    | Gzipped  |
+| ------------- | ------- | -------- |
+| ESM (minified)| ~2.5 kB | **~1 kB** |
+| ESM           | ~5.7 kB | ~1.6 kB  |
+| CJS           | ~6.6 kB | ~2 kB    |
 
 ---
 
 ## Installation
 
 ```bash
-npm install lume
+npm install @beardcoder/lume
 # or
-bun add lume
+bun add @beardcoder/lume
 ```
 
 ---
@@ -30,7 +41,7 @@ bun add lume
 **TypeScript:**
 
 ```ts
-import { createLume, defineComponent } from "lume";
+import { createLume, defineComponent } from "@beardcoder/lume";
 
 const disclosure = defineComponent(({ part, signal, on, effect }) => {
   const button = part("button");
@@ -74,7 +85,7 @@ menu.hide();
 Define a component using `defineComponent`. It receives a context object and returns its public API.
 
 ```ts
-import { defineComponent } from "lume";
+import { defineComponent } from "@beardcoder/lume";
 
 export default defineComponent(({ part, signal, effect, on }) => {
   // ...
@@ -85,7 +96,7 @@ export default defineComponent(({ part, signal, effect, on }) => {
 Register and mount:
 
 ```ts
-import { createLume } from "lume";
+import { createLume } from "@beardcoder/lume";
 import myComponent from "./my-component";
 
 const app = createLume();
