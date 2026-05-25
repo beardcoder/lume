@@ -20,5 +20,4 @@ export function createEventBus(
   };
 }
 
-const globalTarget = new EventTarget();
-export const globalBus = createEventBus(globalTarget);
+export const globalBus = createEventBus(new EventTarget());

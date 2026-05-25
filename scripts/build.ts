@@ -11,7 +11,6 @@ const esmResult = await Bun.build({
   target: "browser",
   format: "esm",
   naming: "lume.js",
-  sourcemap: "linked",
 });
 
 if (!esmResult.success) {
@@ -26,7 +25,6 @@ const cjsResult = await Bun.build({
   target: "browser",
   format: "cjs",
   naming: "lume.cjs",
-  sourcemap: "linked",
 });
 
 if (!cjsResult.success) {
@@ -42,7 +40,6 @@ const minResult = await Bun.build({
   format: "esm",
   naming: "lume.min.js",
   minify: true,
-  sourcemap: "linked",
 });
 
 if (!minResult.success) {

@@ -36,7 +36,6 @@ export type ComponentFactory<
 export type ComponentDefinition<
   T extends Record<string, unknown> = Record<string, unknown>,
 > = {
-  __lume_component: true;
   factory: ComponentFactory<T>;
 };
 
