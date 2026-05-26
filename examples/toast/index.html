@@ -4,47 +4,62 @@
   <meta charset="UTF-8" />
   <title>Lume – Toast Example</title>
   <style>
+    body { font-family: system-ui, sans-serif; padding: 2rem; }
     .toast-container { position: fixed; bottom: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
-    .toast { background: #333; color: #fff; padding: 0.75rem 1rem; border-radius: 4px; display: flex; align-items: center; gap: 1rem; }
+    .toast { background: #333; color: #fff; padding: 0.75rem 1rem; border-radius: 4px; display: flex; align-items: center; gap: 1rem; animation: slide-in 0.2s ease-out; }
+    @keyframes slide-in { from { transform: translateX(100%); opacity: 0; } }
+    button { padding: 0.5rem 1rem; cursor: pointer; }
   </style>
 </head>
 <body>
+  <h1>Toast</h1>
+  <button type="button" id="trigger">Show Toast</button>
+
   <div data-lume="toast" data-lume-id="toaster" class="toast-container">
     <template data-lume-part="item">
       <div class="toast" role="status">
         <span data-lume-part="message"></span>
-        <button type="button" data-lume-part="close">Close</button>
+        <button type="button" data-lume-part="close" aria-label="Dismiss">✕</button>
       </div>
     </template>
   </div>
 
-  <button type="button" id="trigger">Show Toast</button>
-
   <script type="module">
     import { createLume, defineComponent } from "../../src/index.ts";
 
-    const toast = defineComponent(({ root, template }) => {
+    const toast = defineComponent(({ root, template, cleanup }) => {
       const createItem = template("item");
+      const timers = new Set();
 
-      function show(message) {
+      function show(message, ttl = 3000) {
         const frag = createItem();
         const item = frag.querySelector(".toast");
-        const msgEl = frag.querySelector("[data-lume-part='message']");
-        const closeBtn = frag.querySelector("[data-lume-part='close']");
-        msgEl.textContent = message;
-        closeBtn.addEventListener("click", () => item.remove());
+        frag.querySelector("[data-lume-part='message']").textContent = message;
+
+        const dismiss = () => {
+          item.remove();
+          clearTimeout(timer);
+          timers.delete(timer);
+        };
+        frag.querySelector("[data-lume-part='close']")
+          .addEventListener("click", dismiss);
+
+        const timer = setTimeout(dismiss, ttl);
+        timers.add(timer);
         root.appendChild(frag);
       }
+
+      cleanup(() => { for (const t of timers) clearTimeout(t); });
 
       return { show };
     });
 
-    const app = createLume();
-    app.component("toast", toast).mount();
-
+    const app = createLume().component("toast", toast).mount();
     const toaster = app.require("toaster");
+
+    let n = 1;
     document.getElementById("trigger").addEventListener("click", () => {
-      toaster.show("Hello from Lume!");
+      toaster.show(`Toast #${n++}`);
     });
   </script>
 </body>

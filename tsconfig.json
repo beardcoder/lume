@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2024",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "lib": ["ES2020", "DOM"],
+    "lib": ["ES2024", "ESNext.Disposable", "ESNext.Iterator", "DOM"],
     "strict": true,
     "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
     "types": ["bun-types"]
   },
   "include": ["src", "test", "scripts"]

@@ -1,6 +1,6 @@
 import { queryPart, queryParts, queryTemplate } from "./dom";
 import { type createEventBus, globalBus } from "./events";
-import { effect, signal } from "./reactivity";
+import { computed, effect, signal } from "./reactivity";
 import type { ComponentContext } from "./types";
 
 export function createContext(
@@ -11,10 +11,13 @@ export function createContext(
 
   const ctx: ComponentContext = {
     root,
-    part: (name) => queryPart(root, name),
-    parts: (name) => queryParts(root, name),
+    part: <T extends HTMLElement = HTMLElement>(name: string): T =>
+      queryPart<T>(root, name),
+    parts: <T extends HTMLElement = HTMLElement>(name: string): T[] =>
+      queryParts<T>(root, name),
     template: (name) => queryTemplate(root, name),
     signal,
+    computed,
 
     effect(fn) {
       cleanups.push(effect(fn));

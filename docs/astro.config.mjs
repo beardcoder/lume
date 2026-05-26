@@ -1,5 +1,5 @@
-import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
+import { defineConfig } from "astro/config";
 import starlightThemeNova from "starlight-theme-nova";
 
 export default defineConfig({

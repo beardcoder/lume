@@ -1,6 +1,8 @@
+import type { Dispose } from "./types";
+
 export type EventBus = {
   emit(name: string, detail?: unknown): void;
-  listen(name: string, handler: (detail: unknown) => void): () => void;
+  listen(name: string, handler: (detail: unknown) => void): Dispose;
 };
 
 export function createEventBus(
@@ -15,9 +17,10 @@ export function createEventBus(
         handler((e as CustomEvent).detail);
       };
       target.addEventListener(name, listener);
-      return () => target.removeEventListener(name, listener);
+      const dispose = () => target.removeEventListener(name, listener);
+      return Object.assign(dispose, { [Symbol.dispose]: dispose });
     },
   };
 }
 
-export const globalBus = createEventBus(new EventTarget());
+export const globalBus: EventBus = createEventBus();

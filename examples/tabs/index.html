@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lume – Tabs Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 2rem; }
+    .tabs { max-width: 32rem; }
+    .tablist { display: flex; gap: 0.25rem; border-bottom: 1px solid #ccc; }
+    .tablist button {
+      padding: 0.5rem 1rem; border: 0; background: transparent; cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tablist button[aria-selected="true"] { border-color: #06f; color: #06f; }
+    .panel { padding: 1rem 0; }
+    .panel[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Tabs</h1>
+  <div class="tabs" data-lume="tabs">
+    <div class="tablist" role="tablist">
+      <button type="button" role="tab" data-lume-part="tab" data-key="one">One</button>
+      <button type="button" role="tab" data-lume-part="tab" data-key="two">Two</button>
+      <button type="button" role="tab" data-lume-part="tab" data-key="three">Three</button>
+    </div>
+    <div class="panel" role="tabpanel" data-lume-part="panel" data-key="one">Panel one content.</div>
+    <div class="panel" role="tabpanel" data-lume-part="panel" data-key="two">Panel two content.</div>
+    <div class="panel" role="tabpanel" data-lume-part="panel" data-key="three">Panel three content.</div>
+  </div>
+
+  <script type="module">
+    import { createLume, defineComponent } from "../../src/index.ts";
+
+    const tabs = defineComponent(({ parts, signal, on, effect }) => {
+      const tabs = parts("tab");
+      const panels = parts("panel");
+      const active = signal(tabs[0]?.dataset.key ?? "");
+
+      for (const tab of tabs) {
+        on(tab, "click", () => active.set(tab.dataset.key ?? ""));
+      }
+
+      effect(() => {
+        const key = active();
+        for (const tab of tabs) {
+          tab.setAttribute("aria-selected", String(tab.dataset.key === key));
+        }
+        for (const panel of panels) {
+          panel.hidden = panel.dataset.key !== key;
+        }
+      });
+
+      return { active, select: (k) => active.set(k) };
+    });
+
+    createLume().component("tabs", tabs).mount();
+  </script>
+</body>
+</html>

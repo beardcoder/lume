@@ -1,13 +1,17 @@
-export function queryPart(root: HTMLElement, name: string): HTMLElement {
-  const el = root.querySelector<HTMLElement>(`[data-lume-part="${name}"]`);
+export function queryPart<T extends HTMLElement = HTMLElement>(
+  root: HTMLElement,
+  name: string
+): T {
+  const el = root.querySelector<T>(`[data-lume-part="${name}"]`);
   if (!el) throw new Error(`[lume] part "${name}" not found`);
   return el;
 }
 
-export function queryParts(root: HTMLElement, name: string): HTMLElement[] {
-  return Array.from(
-    root.querySelectorAll<HTMLElement>(`[data-lume-part="${name}"]`)
-  );
+export function queryParts<T extends HTMLElement = HTMLElement>(
+  root: HTMLElement,
+  name: string
+): T[] {
+  return Array.from(root.querySelectorAll<T>(`[data-lume-part="${name}"]`));
 }
 
 export function queryTemplate(

@@ -1,51 +1,46 @@
 import { createContext } from "./context";
 import { findLumeRoots } from "./dom";
 import { createEventBus, globalBus } from "./events";
-import type { ComponentDefinition, LumeApp, Plugin } from "./types";
+import type { ComponentFactory, LumeApp, Plugin } from "./types";
+
+type MountedEntry = { id: string | null; dispose: () => void };
 
 export function createLume(): LumeApp {
-  const components = new Map<string, ComponentDefinition>();
+  const components = new Map<string, ComponentFactory>();
   const instances = new Map<string, Record<string, unknown>>();
-  const disposeMap = new Map<HTMLElement, () => void>();
+  const mounted = new Map<HTMLElement, MountedEntry>();
   const appBus = createEventBus();
 
   const app: LumeApp = {
-    component(name, def) {
-      components.set(name, def);
+    component(name, factory) {
+      components.set(name, factory as ComponentFactory);
       return app;
     },
 
     mount(root = document) {
-      const roots = findLumeRoots(root);
+      for (const el of findLumeRoots(root)) {
+        if (mounted.has(el)) continue;
 
-      for (const el of roots) {
         const name = el.getAttribute("data-lume");
-        if (!name) continue;
-
-        const def = components.get(name);
-        if (!def) continue;
+        const factory = name ? components.get(name) : undefined;
+        if (!factory) continue;
 
         const id = el.getAttribute("data-lume-id");
-
         const { ctx, dispose } = createContext(el, appBus);
-        disposeMap.set(el, dispose);
+        const api = factory(ctx);
 
-        const api = def.factory(ctx);
-
-        if (id) {
-          instances.set(id, api);
-        }
+        mounted.set(el, { id, dispose });
+        if (id) instances.set(id, api);
       }
-
       return app;
     },
 
     unmount() {
-      for (const dispose of disposeMap.values()) {
+      for (const { id, dispose } of mounted.values()) {
         dispose();
+        if (id) instances.delete(id);
       }
-      disposeMap.clear();
-      instances.clear();
+      mounted.clear();
     },
 
     get<T extends Record<string, unknown>>(id: string): T | undefined {
@@ -54,9 +49,7 @@ export function createLume(): LumeApp {
 
     require<T extends Record<string, unknown>>(id: string): T {
       const instance = instances.get(id) as T | undefined;
-      if (!instance) {
-        throw new Error(`[lume] Component "${id}" not found`);
-      }
+      if (!instance) throw new Error(`[lume] Component "${id}" not found`);
       return instance;
     },
 
@@ -80,6 +73,10 @@ export function createLume(): LumeApp {
     use(plugin: Plugin) {
       plugin(app);
       return app;
+    },
+
+    [Symbol.dispose]() {
+      app.unmount();
     },
   };
 

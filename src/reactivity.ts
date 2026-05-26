@@ -1,48 +1,46 @@
-import type { EffectFn, SignalGetter } from "./types";
+import type { Dispose, EffectFn, SignalGetter } from "./types";
 
-let activeEffect: EffectCleanup | null = null;
-
-type EffectCleanup = {
+type Effect = {
   fn: EffectFn;
-  deps: Set<Set<EffectCleanup>>;
+  deps: Set<Set<Effect>>;
   cleanup: (() => void) | null;
 };
 
-function createEffect(fn: EffectFn): EffectCleanup {
-  const effect: EffectCleanup = {
-    fn,
-    deps: new Set(),
-    cleanup: null,
-  };
-  return effect;
-}
+let activeEffect: Effect | null = null;
+let batchDepth = 0;
+const pending = new Set<Effect>();
 
-function runEffect(effect: EffectCleanup): void {
-  for (const dep of effect.deps) {
-    dep.delete(effect);
-  }
-  effect.deps.clear();
+function runEffect(e: Effect): void {
+  for (const dep of e.deps) dep.delete(e);
+  e.deps.clear();
 
-  if (effect.cleanup) {
-    effect.cleanup();
-    effect.cleanup = null;
-  }
+  e.cleanup?.();
+  e.cleanup = null;
 
   const prev = activeEffect;
-  activeEffect = effect;
+  activeEffect = e;
   try {
-    const result = effect.fn();
-    if (typeof result === "function") {
-      effect.cleanup = result;
-    }
+    const result = e.fn();
+    if (typeof result === "function") e.cleanup = result;
   } finally {
     activeEffect = prev;
   }
 }
 
+function schedule(e: Effect): void {
+  if (batchDepth > 0) pending.add(e);
+  else runEffect(e);
+}
+
+function asDispose(fn: () => void): Dispose {
+  const d = fn as Dispose;
+  d[Symbol.dispose] = fn;
+  return d;
+}
+
 export function signal<T>(initial: T): SignalGetter<T> {
   let value = initial;
-  const subscribers = new Set<EffectCleanup>();
+  const subscribers = new Set<Effect>();
 
   const getter = (() => {
     if (activeEffect) {
@@ -52,12 +50,10 @@ export function signal<T>(initial: T): SignalGetter<T> {
     return value;
   }) as SignalGetter<T>;
 
-  getter.set = (newValue: T): void => {
-    if (Object.is(value, newValue)) return;
-    value = newValue;
-    for (const effect of [...subscribers]) {
-      runEffect(effect);
-    }
+  getter.set = (next: T): void => {
+    if (Object.is(value, next)) return;
+    value = next;
+    for (const sub of [...subscribers]) schedule(sub);
   };
 
   getter.update = (fn: (current: T) => T): void => {
@@ -67,18 +63,37 @@ export function signal<T>(initial: T): SignalGetter<T> {
   return getter;
 }
 
-export function effect(fn: EffectFn): () => void {
-  const e = createEffect(fn);
+export function effect(fn: EffectFn): Dispose {
+  const e: Effect = { fn, deps: new Set(), cleanup: null };
   runEffect(e);
 
-  return () => {
-    for (const dep of e.deps) {
-      dep.delete(e);
-    }
+  return asDispose(() => {
+    for (const dep of e.deps) dep.delete(e);
     e.deps.clear();
-    if (e.cleanup) {
-      e.cleanup();
-      e.cleanup = null;
+    e.cleanup?.();
+    e.cleanup = null;
+    pending.delete(e);
+  });
+}
+
+export function computed<T>(fn: () => T): SignalGetter<T> {
+  const s = signal<T>(undefined as T);
+  effect(() => {
+    s.set(fn());
+  });
+  return s;
+}
+
+export function batch(fn: () => void): void {
+  batchDepth++;
+  try {
+    fn();
+  } finally {
+    batchDepth--;
+    if (batchDepth === 0) {
+      const effects = [...pending];
+      pending.clear();
+      for (const e of effects) runEffect(e);
     }
-  };
+  }
 }

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lume – Counter Example</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 2rem; }
+    .counter { display: flex; align-items: center; gap: 0.75rem; }
+    button { padding: 0.5rem 1rem; cursor: pointer; }
+    output { font-variant-numeric: tabular-nums; font-size: 1.5rem; min-width: 3ch; text-align: center; }
+    [data-lume-part="double"] { color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Counter</h1>
+  <div class="counter" data-lume="counter" data-lume-id="c1">
+    <button type="button" data-lume-part="dec">−</button>
+    <output data-lume-part="value">0</output>
+    <button type="button" data-lume-part="inc">+</button>
+    <span>(× 2 = <span data-lume-part="double">0</span>)</span>
+  </div>
+
+  <script type="module">
+    import { createLume, defineComponent } from "../../src/index.ts";
+
+    const counter = defineComponent(({ part, signal, computed, on, effect }) => {
+      const count = signal(0);
+      const double = computed(() => count() * 2);
+
+      const value = part("value");
+      const doubled = part("double");
+
+      on(part("inc"), "click", () => count.update(v => v + 1));
+      on(part("dec"), "click", () => count.update(v => v - 1));
+
+      effect(() => { value.textContent = String(count()); });
+      effect(() => { doubled.textContent = String(double()); });
+
+      return { value: count, reset: () => count.set(0) };
+    });
+
+    createLume().component("counter", counter).mount();
+  </script>
+</body>
+</html>

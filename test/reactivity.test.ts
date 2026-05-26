@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { effect, signal } from "../src/reactivity";
+import { batch, computed, effect, signal } from "../src/reactivity";
 
 describe("signal", () => {
   test("returns initial value", () => {
@@ -65,7 +65,7 @@ describe("effect", () => {
     expect(count).toBe(1);
   });
 
-  test("cleanup callback runs on re-execute", () => {
+  test("cleanup callback runs on re-execute and dispose", () => {
     const s = signal(0);
     const cleanups: number[] = [];
     effect(() => {
@@ -77,5 +77,63 @@ describe("effect", () => {
     s.set(1);
     s.set(2);
     expect(cleanups).toEqual([0, 1]);
+  });
+});
+
+describe("computed", () => {
+  test("derives from a signal", () => {
+    const a = signal(2);
+    const doubled = computed(() => a() * 2);
+    expect(doubled()).toBe(4);
+    a.set(5);
+    expect(doubled()).toBe(10);
+  });
+
+  test("chains computed values", () => {
+    const a = signal(1);
+    const b = computed(() => a() + 1);
+    const c = computed(() => b() * 10);
+    expect(c()).toBe(20);
+    a.set(3);
+    expect(c()).toBe(40);
+  });
+});
+
+describe("Symbol.dispose", () => {
+  test("effect can be disposed with `using`", () => {
+    const s = signal(0);
+    let runs = 0;
+    {
+      using _e = effect(() => {
+        s();
+        runs++;
+      });
+      s.set(1);
+      expect(runs).toBe(2);
+    }
+    s.set(2);
+    expect(runs).toBe(2);
+  });
+});
+
+describe("batch", () => {
+  test("groups multiple sets into one effect run", () => {
+    const a = signal(0);
+    const b = signal(0);
+    let runs = 0;
+    effect(() => {
+      a();
+      b();
+      runs++;
+    });
+    expect(runs).toBe(1);
+    batch(() => {
+      a.set(1);
+      b.set(2);
+      a.set(3);
+    });
+    expect(runs).toBe(2);
+    expect(a()).toBe(3);
+    expect(b()).toBe(2);
   });
 });

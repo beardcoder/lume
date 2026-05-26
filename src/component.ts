@@ -1,7 +1,7 @@
-import type { ComponentDefinition, ComponentFactory } from "./types";
+import type { ComponentFactory } from "./types";
 
 export function defineComponent<T extends Record<string, unknown>>(
   factory: ComponentFactory<T>
-): ComponentDefinition<T> {
-  return { factory };
+): ComponentFactory<T> {
+  return factory;
 }
