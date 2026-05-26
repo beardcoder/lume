@@ -6,23 +6,24 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ci:
+  check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version-file: package.json
+
       - name: Install dependencies
-        run: bun install
-      - name: Type check
-        run: bun run typecheck
-      - name: Lint
-        run: bun run lint
-      - name: Test
-        run: bun run test
-      - name: Build
-        run: bun run build
+        run: bun install --frozen-lockfile
+
+      - name: Typecheck, lint, test, build
+        run: bun run check

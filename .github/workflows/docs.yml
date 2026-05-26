@@ -15,27 +15,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Install docs dependencies
-        working-directory: docs
-        run: npm ci
-
-      - name: Build docs
-        working-directory: docs
-        run: npm run build
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/dist
-
   check_pages:
     runs-on: ubuntu-latest
     outputs:
@@ -53,16 +32,41 @@ jobs:
               core.setOutput("enabled", "true");
             } catch (error) {
               if (error.status === 404) {
-                core.info("GitHub Pages is not enabled for this repository. Skipping deploy job.");
+                core.info("GitHub Pages is not enabled for this repository. Skipping.");
                 core.setOutput("enabled", "false");
                 return;
               }
               throw error;
             }
 
-  deploy:
+  build:
+    needs: check_pages
     if: ${{ needs.check_pages.outputs.enabled == 'true' }}
-    needs: [build, check_pages]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install docs dependencies
+        working-directory: docs
+        run: npm ci
+
+      - name: Build docs
+        working-directory: docs
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/dist
+
+  deploy:
+    needs: [check_pages, build]
+    if: ${{ needs.check_pages.outputs.enabled == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
