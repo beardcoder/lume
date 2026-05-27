@@ -21,7 +21,7 @@ jobs:
       enabled: ${{ steps.pages_check.outputs.enabled }}
     steps:
       - id: pages_check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             try {
