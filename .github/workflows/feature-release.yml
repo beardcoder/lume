@@ -3,6 +3,14 @@ name: Feature Release
 on:
   workflow_dispatch:
     inputs:
+      bump:
+        description: "Version bump level"
+        required: true
+        default: "minor"
+        type: choice
+        options:
+          - minor
+          - major
       dry-run:
         description: "Run without publishing, tagging, or pushing"
         required: false
@@ -15,7 +23,7 @@ concurrency:
 
 jobs:
   release:
-    name: Bump minor & Publish
+    name: Bump ${{ inputs.bump }} & Publish
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -46,16 +54,16 @@ jobs:
       - name: Verify (typecheck, lint, test, build)
         run: bun run check
 
-      - name: Ensure a minor changeset exists
+      - name: Ensure a ${{ inputs.bump }} changeset exists
         run: |
           shopt -s nullglob
           mkdir -p .changeset
-          cat > .changeset/feature-release.md <<'EOF'
+          cat > .changeset/feature-release.md <<EOF
           ---
-          "@beardcoder/lume": minor
+          "@beardcoder/lume": ${{ inputs.bump }}
           ---
 
-          Feature release.
+          ${{ inputs.bump == 'major' && 'Major release.' || 'Feature release.' }}
           EOF
 
       - name: Apply version bump
