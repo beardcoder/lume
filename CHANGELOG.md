@@ -1,5 +1,11 @@
 # @beardcoder/lume
 
+## 0.6.0
+
+### Minor Changes
+
+- Feature release.
+
 ## 0.5.0
 
 ### Minor Changes
