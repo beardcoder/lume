@@ -60,6 +60,8 @@ export function signal<T>(initial: T): SignalGetter<T> {
     getter.set(fn(value));
   };
 
+  getter.peek = (): T => value;
+
   return getter;
 }
 
@@ -95,5 +97,16 @@ export function batch(fn: () => void): void {
       pending.clear();
       for (const e of effects) runEffect(e);
     }
+  }
+}
+
+/** Run `fn` without subscribing the surrounding effect to any signal it reads. */
+export function untrack<T>(fn: () => T): T {
+  const prev = activeEffect;
+  activeEffect = null;
+  try {
+    return fn();
+  } finally {
+    activeEffect = prev;
   }
 }

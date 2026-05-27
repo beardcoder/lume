@@ -64,6 +64,69 @@ describe("createLume", () => {
     expect(app.get("w1")).toBeUndefined();
   });
 
+  test("unmount disposes effects and event listeners", () => {
+    setupDOM(`
+      <div data-lume="probe" data-lume-id="p1">
+        <button data-lume-part="btn">x</button>
+      </div>
+    `);
+
+    const effectRuns: number[] = [];
+    const clickHandler = mock();
+
+    const probe = defineComponent(({ part, signal, effect, on, cleanup }) => {
+      const count = signal(0);
+      effect(() => {
+        effectRuns.push(count());
+      });
+      on(part("btn"), "click", clickHandler);
+      cleanup(() => effectRuns.push(-1));
+      return {
+        bump: () => count.update((v) => v + 1),
+      };
+    });
+
+    const app = createLume();
+    app.component("probe", probe).mount();
+
+    const api = app.require<{ bump(): void }>("p1");
+    api.bump();
+    expect(effectRuns).toEqual([0, 1]);
+
+    const btn = document.querySelector<HTMLButtonElement>(
+      "[data-lume-part=btn]"
+    );
+    btn?.click();
+    expect(clickHandler).toHaveBeenCalledTimes(1);
+
+    app.unmount();
+
+    api.bump();
+    expect(effectRuns).toEqual([0, 1, -1]);
+    btn?.click();
+    expect(clickHandler).toHaveBeenCalledTimes(1);
+  });
+
+  test("duplicate id throws on mount", () => {
+    setupDOM(`
+      <div data-lume="w" data-lume-id="dup"></div>
+      <div data-lume="w" data-lume-id="dup"></div>
+    `);
+    const w = defineComponent(() => ({}));
+    const app = createLume();
+    app.component("w", w);
+    expect(() => app.mount()).toThrow('Duplicate component id "dup"');
+  });
+
+  test("global bus is shared across apps", () => {
+    const a = createLume();
+    const b = createLume();
+    const handler = mock();
+    b.global.listen("ping", handler);
+    a.global.emit("ping", { from: "a" });
+    expect(handler).toHaveBeenCalledWith({ from: "a" });
+  });
+
   test("use calls plugin with app", () => {
     const app = createLume();
     const plugin = mock((a: unknown) => {

@@ -1,7 +1,11 @@
 export type SignalGetter<T> = {
   (): T;
+  /** Update the value and notify subscribers. No-op if value is `Object.is`-equal. */
   set(value: T): void;
+  /** Transform the current value via a function. */
   update(fn: (current: T) => T): void;
+  /** Read the value without subscribing the surrounding effect. */
+  peek(): T;
 };
 
 // biome-ignore lint/suspicious/noConfusingVoidType: effects may return cleanup or nothing.
@@ -17,6 +21,7 @@ export type ComponentContext = {
   signal<T>(initial: T): SignalGetter<T>;
   computed<T>(fn: () => T): SignalGetter<T>;
   effect(fn: EffectFn): void;
+  untrack<T>(fn: () => T): T;
   on(
     target: EventTarget,
     event: string,

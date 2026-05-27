@@ -114,7 +114,9 @@ app.component("my-component", myComponent).mount();
 | `parts(name)`     | Finds all matching parts                            |
 | `template(name)`  | Returns a factory that clones a `<template>` part   |
 | `signal(initial)` | Creates a reactive signal                           |
+| `computed(fn)`    | Creates a derived signal                            |
 | `effect(fn)`      | Runs fn immediately and again when signals change   |
+| `untrack(fn)`     | Reads signals without subscribing the effect        |
 | `on(target, event, handler, options?)` | Adds an event listener with auto cleanup |
 | `cleanup(fn)`     | Registers a cleanup function                        |
 | `emit(name, detail?)` | Emits a local app event                         |
@@ -128,13 +130,18 @@ app.component("my-component", myComponent).mount();
 
 ```ts
 const count = signal(0);   // create
-count();                   // read
+count();                   // read (subscribes the surrounding effect)
+count.peek();              // read without subscribing
 count.set(1);              // write
 count.update(v => v + 1);  // transform
 
 effect(() => {
   console.log("count is", count()); // runs on change
 });
+
+// Read multiple signals untracked
+import { untrack } from "@beardcoder/lume";
+const total = untrack(() => price() * quantity());
 ```
 
 ---

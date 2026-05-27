@@ -5,6 +5,7 @@ import {
   computed as _computed,
   effect as _effect,
   signal as _signal,
+  untrack as _untrack,
 } from "./reactivity";
 
 export const createLume = _createLume;
@@ -13,6 +14,7 @@ export const signal = _signal;
 export const computed = _computed;
 export const effect = _effect;
 export const batch = _batch;
+export const untrack = _untrack;
 
 export type {
   ComponentContext,

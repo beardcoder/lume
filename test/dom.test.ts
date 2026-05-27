@@ -20,6 +20,13 @@ describe("queryPart", () => {
       'part "missing" not found'
     );
   });
+
+  test("error message includes component name and id when present", () => {
+    const root = document.createElement("div");
+    root.setAttribute("data-lume", "menu");
+    root.setAttribute("data-lume-id", "main");
+    expect(() => queryPart(root, "missing")).toThrow("menu#main");
+  });
 });
 
 describe("queryParts", () => {

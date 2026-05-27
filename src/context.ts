@@ -1,6 +1,6 @@
 import { queryPart, queryParts, queryTemplate } from "./dom";
 import { type createEventBus, globalBus } from "./events";
-import { computed, effect, signal } from "./reactivity";
+import { computed, effect, signal, untrack } from "./reactivity";
 import type { ComponentContext } from "./types";
 
 export function createContext(
@@ -18,6 +18,7 @@ export function createContext(
     template: (name) => queryTemplate(root, name),
     signal,
     computed,
+    untrack,
 
     effect(fn) {
       cleanups.push(effect(fn));

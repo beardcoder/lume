@@ -26,6 +26,12 @@ export function createLume(): LumeApp {
         if (!factory) continue;
 
         const id = el.getAttribute("data-lume-id");
+        if (id && instances.has(id)) {
+          throw new Error(
+            `[lume] Duplicate component id "${id}" — ids must be unique per app`
+          );
+        }
+
         const { ctx, dispose } = createContext(el, appBus);
         const api = factory(ctx);
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { batch, computed, effect, signal } from "../src/reactivity";
+import { batch, computed, effect, signal, untrack } from "../src/reactivity";
 
 describe("signal", () => {
   test("returns initial value", () => {
@@ -29,6 +29,45 @@ describe("signal", () => {
     expect(count).toBe(1);
     s.set(1);
     expect(count).toBe(1);
+  });
+
+  test("peek reads without subscribing", () => {
+    const s = signal(0);
+    let runs = 0;
+    effect(() => {
+      s.peek();
+      runs++;
+    });
+    expect(runs).toBe(1);
+    s.set(1);
+    expect(runs).toBe(1);
+    expect(s.peek()).toBe(1);
+  });
+});
+
+describe("untrack", () => {
+  test("reads inside untrack do not subscribe", () => {
+    const a = signal(0);
+    const b = signal(0);
+    let runs = 0;
+    effect(() => {
+      a();
+      untrack(() => {
+        b();
+      });
+      runs++;
+    });
+    expect(runs).toBe(1);
+    b.set(1);
+    expect(runs).toBe(1);
+    a.set(1);
+    expect(runs).toBe(2);
+  });
+
+  test("returns the inner function's value", () => {
+    const s = signal(7);
+    const value = untrack(() => s() * 2);
+    expect(value).toBe(14);
   });
 });
 
