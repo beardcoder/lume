@@ -2,9 +2,12 @@ name: Release
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*"
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -12,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      pull-requests: write
       id-token: write
     steps:
       - uses: actions/checkout@v6
@@ -34,14 +36,18 @@ jobs:
       - name: Verify (typecheck, lint, test, build)
         run: bun run check
 
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
-        with:
-          publish: bun run release
-          version: bun run version
-          commit: "chore: release"
-          title: "chore: release"
+      - name: Publish to npm
+        run: bun run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
