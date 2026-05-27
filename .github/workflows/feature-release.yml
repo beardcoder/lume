@@ -22,12 +22,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: Bump ${{ inputs.bump }} & Publish
+  bump:
+    name: Bump ${{ inputs.bump }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: v${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -37,11 +39,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          registry-url: https://registry.npmjs.org
 
       - name: Configure git
         run: |
@@ -56,7 +53,6 @@ jobs:
 
       - name: Ensure a ${{ inputs.bump }} changeset exists
         run: |
-          shopt -s nullglob
           mkdir -p .changeset
           cat > .changeset/feature-release.md <<EOF
           ---
@@ -87,3 +83,14 @@ jobs:
         run: |
           echo "Dry run complete. Computed version: ${{ steps.version.outputs.version }}"
           echo "No commit, tag, push, or publish was performed."
+
+  release:
+    needs: bump
+    if: ${{ !inputs.dry-run }}
+    uses: ./.github/workflows/release.yml
+    with:
+      tag: ${{ needs.bump.outputs.tag }}
+    secrets: inherit
+    permissions:
+      contents: write
+      id-token: write
