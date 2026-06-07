@@ -1,50 +1,46 @@
 import { rmSync } from "node:fs";
+import { gzipSync } from "node:zlib";
 
 try {
   rmSync("./dist", { recursive: true });
 } catch {}
 
-// ESM
-const esmResult = await Bun.build({
-  entrypoints: ["./src/index.ts"],
-  outdir: "./dist",
-  target: "browser",
-  format: "esm",
-  naming: "lume.js",
-});
+type Target = {
+  label: string;
+  naming: string;
+  format: "esm" | "cjs";
+  minify?: boolean;
+};
 
-if (!esmResult.success) {
-  console.error("ESM build failed:", esmResult.logs);
-  process.exit(1);
-}
+const targets: Target[] = [
+  { label: "ESM", naming: "lume.js", format: "esm" },
+  { label: "CJS", naming: "lume.cjs", format: "cjs" },
+  // ESM (minified) — for CDN / size reporting.
+  { label: "ESM (min)", naming: "lume.min.js", format: "esm", minify: true },
+];
 
-// CJS
-const cjsResult = await Bun.build({
-  entrypoints: ["./src/index.ts"],
-  outdir: "./dist",
-  target: "browser",
-  format: "cjs",
-  naming: "lume.cjs",
-});
+const formatBytes = (bytes: number) => `${(bytes / 1024).toFixed(2)} kB`;
 
-if (!cjsResult.success) {
-  console.error("CJS build failed:", cjsResult.logs);
-  process.exit(1);
-}
+for (const { label, naming, format, minify } of targets) {
+  const result = await Bun.build({
+    entrypoints: ["./src/index.ts"],
+    outdir: "./dist",
+    target: "browser",
+    format,
+    naming,
+    minify,
+  });
 
-// ESM (minified) - for CDN / size reporting
-const minResult = await Bun.build({
-  entrypoints: ["./src/index.ts"],
-  outdir: "./dist",
-  target: "browser",
-  format: "esm",
-  naming: "lume.min.js",
-  minify: true,
-});
+  if (!result.success) {
+    console.error(`${label} build failed:`, result.logs);
+    process.exit(1);
+  }
 
-if (!minResult.success) {
-  console.error("Minified build failed:", minResult.logs);
-  process.exit(1);
+  const raw = await Bun.file(`./dist/${naming}`).bytes();
+  const gzipped = gzipSync(raw).length;
+  console.log(
+    `${label.padEnd(9)} ${naming.padEnd(12)} ${formatBytes(raw.length).padStart(9)}  →  ${formatBytes(gzipped).padStart(9)} gzipped`
+  );
 }
 
 console.log("Build complete.");
