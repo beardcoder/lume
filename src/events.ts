@@ -1,3 +1,4 @@
+import { asDispose } from "./reactivity";
 import type { Dispose } from "./types";
 
 export type EventBus = {
@@ -17,8 +18,7 @@ export function createEventBus(
         handler((e as CustomEvent).detail);
       };
       target.addEventListener(name, listener);
-      const dispose = () => target.removeEventListener(name, listener);
-      return Object.assign(dispose, { [Symbol.dispose]: dispose });
+      return asDispose(() => target.removeEventListener(name, listener));
     },
   };
 }

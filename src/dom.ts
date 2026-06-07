@@ -1,8 +1,5 @@
-function escapeSelector(value: string): string {
-  if (typeof CSS !== "undefined" && typeof CSS.escape === "function") {
-    return CSS.escape(value);
-  }
-  return value.replace(/["\\]/g, "\\$&");
+function partSelector(name: string): string {
+  return `[data-lume-part="${CSS.escape(name)}"]`;
 }
 
 function describeRoot(root: HTMLElement): string {
@@ -16,9 +13,7 @@ export function queryPart<T extends HTMLElement = HTMLElement>(
   root: HTMLElement,
   name: string
 ): T {
-  const el = root.querySelector<T>(
-    `[data-lume-part="${escapeSelector(name)}"]`
-  );
+  const el = root.querySelector<T>(partSelector(name));
   if (!el) {
     throw new Error(`[lume] part "${name}" not found in ${describeRoot(root)}`);
   }
@@ -29,9 +24,7 @@ export function queryParts<T extends HTMLElement = HTMLElement>(
   root: HTMLElement,
   name: string
 ): T[] {
-  return Array.from(
-    root.querySelectorAll<T>(`[data-lume-part="${escapeSelector(name)}"]`)
-  );
+  return Array.from(root.querySelectorAll<T>(partSelector(name)));
 }
 
 export function queryTemplate(
@@ -39,7 +32,7 @@ export function queryTemplate(
   name: string
 ): () => DocumentFragment {
   const tpl = root.querySelector<HTMLTemplateElement>(
-    `template[data-lume-part="${escapeSelector(name)}"]`
+    `template${partSelector(name)}`
   );
   if (!tpl) {
     throw new Error(
