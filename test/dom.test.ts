@@ -27,6 +27,11 @@ describe("queryPart", () => {
     root.setAttribute("data-lume-id", "main");
     expect(() => queryPart(root, "missing")).toThrow("menu#main");
   });
+
+  test("escapes part names with special characters", () => {
+    const root = makeEl(`<div data-lume-part="item:1"></div>`);
+    expect(queryPart(root, "item:1").tagName).toBe("DIV");
+  });
 });
 
 describe("queryParts", () => {

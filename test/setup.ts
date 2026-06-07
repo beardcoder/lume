@@ -14,6 +14,7 @@ Object.assign(globalThis, {
   HTMLElement: window.HTMLElement,
   HTMLTemplateElement: window.HTMLTemplateElement,
   SyntaxError: window.SyntaxError,
+  CSS: window.CSS,
 });
 
 afterEach(() => {

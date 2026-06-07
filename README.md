@@ -2,18 +2,18 @@
 
 > Small reactive components for existing HTML.
 
-[![Bundle Size](https://img.shields.io/badge/gzip-~1.35kB-brightgreen)](https://github.com/beardcoder/lume)
+[![Bundle Size](https://img.shields.io/badge/gzip-~1.3kB-brightgreen)](https://github.com/beardcoder/lume)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 Lume lets you attach reactive TypeScript components to existing HTML — no renderer, no Virtual DOM, no JSX. It is calm, clean, and browser-native.
 
 ### Bundle Size
 
-| Format         | Size    | Gzipped       |
-| -------------- | ------- | ------------- |
-| ESM (minified) | ~3.2 kB | **~1.35 kB**  |
-| ESM            | ~6.8 kB | ~1.9 kB       |
-| CJS            | ~8.0 kB | ~2.3 kB       |
+| Format         | Size    | Gzipped      |
+| -------------- | ------- | ------------ |
+| ESM (minified) | ~3.0 kB | **~1.3 kB**  |
+| ESM            | ~6.5 kB | ~1.85 kB     |
+| CJS            | ~7.7 kB | ~2.3 kB      |
 
 ---
 

@@ -10,12 +10,15 @@ let activeEffect: Effect | null = null;
 let batchDepth = 0;
 const pending = new Set<Effect>();
 
-function runEffect(e: Effect): void {
+function teardown(e: Effect): void {
   for (const dep of e.deps) dep.delete(e);
   e.deps.clear();
-
   e.cleanup?.();
   e.cleanup = null;
+}
+
+function runEffect(e: Effect): void {
+  teardown(e);
 
   const prev = activeEffect;
   activeEffect = e;
@@ -32,7 +35,8 @@ function schedule(e: Effect): void {
   else runEffect(e);
 }
 
-function asDispose(fn: () => void): Dispose {
+/** Tag a plain cleanup function as a `Dispose` (callable + `Symbol.dispose`). */
+export function asDispose(fn: () => void): Dispose {
   const d = fn as Dispose;
   d[Symbol.dispose] = fn;
   return d;
@@ -70,10 +74,7 @@ export function effect(fn: EffectFn): Dispose {
   runEffect(e);
 
   return asDispose(() => {
-    for (const dep of e.deps) dep.delete(e);
-    e.deps.clear();
-    e.cleanup?.();
-    e.cleanup = null;
+    teardown(e);
     pending.delete(e);
   });
 }
