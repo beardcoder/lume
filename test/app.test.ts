@@ -1,6 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { createLume } from "../src/app";
 import { defineComponent } from "../src/component";
+import { signal } from "../src/reactivity";
 
 function setupDOM(html: string): HTMLElement {
   document.body.innerHTML = html;
@@ -105,6 +106,35 @@ describe("createLume", () => {
     expect(effectRuns).toEqual([0, 1, -1]);
     btn?.click();
     expect(clickHandler).toHaveBeenCalledTimes(1);
+  });
+
+  test("unmount disposes computed derived from an external signal", () => {
+    setupDOM(`<div data-lume="derived" data-lume-id="d1"></div>`);
+
+    // A signal that outlives the component (e.g. app-level state).
+    const source = signal(0);
+    let derivations = 0;
+
+    const derived = defineComponent(({ computed }) => {
+      const doubled = computed(() => {
+        derivations++;
+        return source() * 2;
+      });
+      return { read: () => doubled() };
+    });
+
+    const app = createLume();
+    app.component("derived", derived).mount();
+
+    const api = app.require<{ read(): number }>("d1");
+    expect(api.read()).toBe(0);
+    source.set(1);
+    expect(derivations).toBe(2);
+
+    app.unmount();
+    source.set(2);
+    // The computed's internal effect must not re-run after unmount.
+    expect(derivations).toBe(2);
   });
 
   test("duplicate id throws on mount", () => {
